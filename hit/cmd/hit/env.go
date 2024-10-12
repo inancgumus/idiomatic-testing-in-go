@@ -9,13 +9,6 @@ import (
 	"strconv"
 )
 
-// ------------------------------------------------------------
-// NOTE TO THE READER:
-//
-// See env.flagparser.go for the implementation of the custom
-// flag parsing example from the first sections of this chapter.
-// ------------------------------------------------------------
-
 // env is the program's environment.
 // It abstracts the standard output, standard error, command-line
 // arguments to make the program independent of its environment.
