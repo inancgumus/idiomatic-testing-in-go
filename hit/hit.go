@@ -55,6 +55,7 @@ import (
 type Option func(*Client)
 
 // Concurrency changes [Client]'s concurrency level.
+// The default is the number of CPUs.
 func Concurrency(n int) Option {
 	return func(c *Client) { c.C = n }
 }
