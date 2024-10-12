@@ -21,6 +21,13 @@ func TestSendN(t *testing.T) {
 
 	const wantHits, wantErrors = 10, 0
 
+	/*
+		This test sends ten requests to the server.
+
+		We use the httptest.NewServer function to create a test server that responds to all requests with a 200 OK status code.
+
+		We use the atomic package to increment a counter whenever the server receives a request.
+	*/
 	sum, err := SendN(context.Background(), server.URL, wantHits)
 	if err != nil {
 		t.Fatalf("SendN() err=%q; want nil", err)
