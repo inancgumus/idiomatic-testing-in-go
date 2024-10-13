@@ -64,3 +64,17 @@ var parseTests = []struct {
 	},
 	/* many more test cases can be easily added */
 }
+
+func TestParseTable(t *testing.T) {
+	for _, tt := range parseTests {
+		t.Logf("run %s", tt.name)
+
+		got, err := Parse(tt.uri)
+		if err != nil {
+			t.Fatalf("Parse(%q) err = %v, want <nil>", tt.uri, err)
+		}
+		if *got != *tt.want {
+			t.Errorf("Parse(%q)\ngot  %#v\nwant %#v", tt.uri, got, tt.want)
+		}
+	}
+}
