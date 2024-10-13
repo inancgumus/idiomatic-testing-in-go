@@ -83,3 +83,18 @@ func TestParseTable(t *testing.T) {
 		}
 	}
 }
+
+func TestParseSubtests(t *testing.T) {
+	// common test setup and teardown logic can be put here
+	for _, tt := range parseTests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := Parse(tt.uri)
+			if err != nil {
+				t.Fatalf("Parse(%q) err = %v, want <nil>", tt.uri, err)
+			}
+			if *got != *tt.want {
+				t.Errorf("Parse(%q)\ngot  %#v\nwant %#v", tt.uri, got, tt.want)
+			}
+		})
+	}
+}
