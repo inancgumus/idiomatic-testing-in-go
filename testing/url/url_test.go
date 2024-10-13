@@ -46,3 +46,21 @@ func TestParseWithoutPath(t *testing.T) {
 		t.Errorf("Parse(%q)\ngot  %#v\nwant %#v", uri, got, want)
 	}
 }
+
+var parseTests = []struct {
+	name string
+	uri  string
+	want *URL
+}{
+	{
+		name: "full",
+		uri:  "https://go.dev/play",
+		want: &URL{Scheme: "https", Host: "go.dev", Path: "play"},
+	},
+	{
+		name: "without_path",
+		uri:  "http://github.com",
+		want: &URL{Scheme: "http", Host: "github.com", Path: ""},
+	},
+	/* many more test cases can be easily added */
+}
