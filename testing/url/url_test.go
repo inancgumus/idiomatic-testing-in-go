@@ -16,3 +16,17 @@ func TestParse(t *testing.T) {
 		t.Errorf("Parse(%q)\ngot  %#v\nwant %#v", uri, got, want)
 	}
 }
+
+func TestURLString(t *testing.T) {
+	u := &URL{
+		Scheme: "https",
+		Host:   "go.dev",
+		Path:   "play",
+	}
+
+	got := u.String()
+	want := "https://go.dev/play"
+	if got != want {
+		t.Errorf("String() = %q, want %q", got, want)
+	}
+}
