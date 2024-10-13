@@ -53,6 +53,11 @@ var parseTests = []struct {
 	want *URL
 }{
 	{
+		name: "with_data_scheme",
+		uri:  "data:text/plain;base64,R28gYnkgRXhhbXBsZQ==",
+		want: &URL{Scheme: "data"},
+	},
+	{
 		name: "full",
 		uri:  "https://go.dev/play",
 		want: &URL{Scheme: "https", Host: "go.dev", Path: "play"},
