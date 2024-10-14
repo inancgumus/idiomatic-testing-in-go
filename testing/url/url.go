@@ -36,5 +36,8 @@ func Parse(rawURL string) (*URL, error) {
 
 // String reassembles the URL into a URL string.
 func (u *URL) String() string {
+	if u == nil {
+		return ""
+	}
 	return fmt.Sprintf("%s://%s/%s", u.Scheme, u.Host, u.Path)
 }
