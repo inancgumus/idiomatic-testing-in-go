@@ -16,10 +16,10 @@ type config struct {
 func parseArgs(c *config, args []string) error {
 	fs := flag.NewFlagSet("hit", flag.ContinueOnError)
 
-	fs.StringVar(&c.url, "url", "", "HTTP server URL ")
-	fs.IntVar(&c.n, "n", c.n, "Number of requests")
-	fs.IntVar(&c.c, "c", c.c, "Concurrency level")
-	fs.IntVar(&c.rps, "rps", c.rps, "Requests per second")
+	fs.StringVar(&c.url, "url", "", "HTTP server `URL` (required)")
+	fs.Var(asPositiveIntValue(&c.n), "n", "Number of requests")
+	fs.Var(asPositiveIntValue(&c.c), "c", "Concurrency level")
+	fs.Var(asPositiveIntValue(&c.rps), "rps", "Requests per second")
 
 	return fs.Parse(args)
 }
