@@ -1,10 +1,6 @@
 package main
 
-import (
-	"fmt"
-	"strconv"
-	"strings"
-)
+import "flag"
 
 type config struct {
 	url string // url to send requests
@@ -13,43 +9,13 @@ type config struct {
 	rps int    // rps is the requests per second
 }
 
-type parseFunc func(string) error
-
-func stringVar(p *string) parseFunc {
-	return func(s string) error {
-		*p = s
-		return nil
-	}
-}
-
-func intVar(p *int) parseFunc {
-	return func(s string) error {
-		var err error
-		*p, err = strconv.Atoi(s)
-		return err
-	}
-}
-
 func parseArgs(c *config, args []string) error {
-	flagSet := map[string]parseFunc{
-		"url": stringVar(&c.url),
-		"n":   intVar(&c.n),
-		"c":   intVar(&c.c),
-		"rps": intVar(&c.rps),
-	}
-	for _, arg := range args {
-		fn, fv, ok := strings.Cut(arg, "=")
-		if !ok {
-			continue // wrong flag format
-		}
-		fn = strings.TrimPrefix(fn, "-")
-		parseValue, ok := flagSet[fn]
-		if !ok {
-			continue // not in flagSet
-		}
-		if err := parseValue(fv); err != nil {
-			return fmt.Errorf("invalid value %q for flag %s: %w", fv, fn, err)
-		}
-	}
-	return nil
+	fs := flag.NewFlagSet("hit", flag.ContinueOnError)
+
+	fs.StringVar(&c.url, "url", "", "HTTP server URL ")
+	fs.IntVar(&c.n, "n", c.n, "Number of requests")
+	fs.IntVar(&c.c, "c", c.c, "Concurrency level")
+	fs.IntVar(&c.rps, "rps", c.rps, "Requests per second")
+
+	return fs.Parse(args)
 }
