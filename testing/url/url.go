@@ -16,14 +16,13 @@ type URL struct {
 // Parse parses a raw url into a URL structure.
 func Parse(rawURL string) (*URL, error) {
 	scheme, rest, ok := strings.Cut(rawURL, ":")
-	if !ok {
+	if !ok || scheme == "" {
 		return nil, errors.New("missing scheme")
 	}
 
 	if !strings.HasPrefix(rest, "//") {
 		return &URL{Scheme: scheme}, nil
 	}
-
 	host, path, _ := strings.Cut(rest[2:], "/")
 
 	u := &URL{
