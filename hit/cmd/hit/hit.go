@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 const logo = `
  __  __     __     ______
@@ -21,7 +24,14 @@ Usage:
        Requests per second`
 
 func main() {
-	fmt.Printf("%s\n%s", logo, usage)
-
-	/* TODO: integrate package hit */
+	var c config
+	if err := parseArgs(&c, os.Args[1:]); err != nil {
+		fmt.Printf("%s\n%s", err, usage)
+		os.Exit(1)
+	}
+	fmt.Printf(
+		"%s\n\nSending %d requests to %q (concurrency: %d)\n",
+		logo, c.n, c.url, c.c,
+	)
+	/* package hit integration here */
 }
