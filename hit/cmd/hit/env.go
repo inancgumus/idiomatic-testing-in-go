@@ -1,6 +1,10 @@
 package main
 
-import "strconv"
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
 
 type config struct {
 	url string // url to send requests
@@ -24,4 +28,28 @@ func intVar(p *int) parseFunc {
 		*p, err = strconv.Atoi(s)
 		return err
 	}
+}
+
+func parseArgs(c *config, args []string) error {
+	flagSet := map[string]parseFunc{
+		"url": stringVar(&c.url),
+		"n":   intVar(&c.n),
+		"c":   intVar(&c.c),
+		"rps": intVar(&c.rps),
+	}
+	for _, arg := range args {
+		fn, fv, ok := strings.Cut(arg, "=")
+		if !ok {
+			continue // wrong flag format
+		}
+		fn = strings.TrimPrefix(fn, "-")
+		parseValue, ok := flagSet[fn]
+		if !ok {
+			continue // not in flagSet
+		}
+		if err := parseValue(fv); err != nil {
+			return fmt.Errorf("invalid value %q for flag %s: %w", fv, fn, err)
+		}
+	}
+	return nil
 }
