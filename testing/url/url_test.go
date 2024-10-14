@@ -105,6 +105,7 @@ func TestParseError(t *testing.T) {
 		uri  string
 	}{
 		{name: "without_scheme", uri: "go.dev"},
+		{name: "empty_scheme", uri: "://go.dev"},
 
 		/* we'll add more tests soon */
 	}
