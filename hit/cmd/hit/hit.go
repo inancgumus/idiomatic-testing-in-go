@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -31,12 +32,24 @@ func run(e *env) error {
 	if err := parseArgs(&c, e.args[1:], e.stderr); err != nil {
 		return err
 	}
-
 	fmt.Fprintf(
 		e.stdout,
 		"%s\n\nSending %d requests to %q (concurrency: %d)\n",
 		logo, c.n, c.url, c.c,
 	)
+	if e.dryRun {
+		return nil
+	}
 
+	if err := runHit(e.stdout, &c); err != nil {
+		fmt.Fprintf(e.stderr, "\nerror occurred: %v\n", err)
+		return err
+	}
+
+	return nil
+}
+
+func runHit(stdout io.Writer, c *config) error {
+	/* TODO: integrate the hit package */
 	return nil
 }
