@@ -24,7 +24,7 @@ func TestURLString(t *testing.T) {
 		want string
 	}{
 		{name: "nil", uri: nil, want: ""},
-		/* we'll add more test cases soon */
+		{name: "empty", uri: &URL{}, want: ""},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
