@@ -98,3 +98,22 @@ func TestParseSubtests(t *testing.T) {
 		})
 	}
 }
+
+func TestParseError(t *testing.T) {
+	tests := []struct {
+		name string
+		uri  string
+	}{
+		{name: "without_scheme", uri: "go.dev"},
+
+		/* we'll add more tests soon */
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := Parse(tt.uri)
+			if err == nil {
+				t.Errorf("Parse(%q)=nil; want an error", tt.uri)
+			}
+		})
+	}
+}
