@@ -30,6 +30,12 @@ func parseArgs(c *config, args []string) error {
 	}
 	c.url = fs.Arg(0)
 
+	if err := validateArgs(c); err != nil {
+		fmt.Fprintln(fs.Output(), err)
+		fs.Usage()
+		return err
+	}
+
 	return nil
 }
 
