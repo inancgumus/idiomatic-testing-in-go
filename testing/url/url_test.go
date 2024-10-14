@@ -1,6 +1,10 @@
 package url
 
-import "testing"
+import (
+	"fmt"
+	"strings"
+	"testing"
+)
 
 func TestParse(t *testing.T) {
 	const uri = "https://go.dev/play"
@@ -132,5 +136,20 @@ func BenchmarkURLString(b *testing.B) {
 	}
 	for range b.N {
 		_ = u.String()
+	}
+}
+
+func BenchmarkURLStringLong(b *testing.B) {
+	for _, n := range []int{1, 10, 100, 1_000} {
+		u := &URL{
+			Scheme: strings.Repeat("x", n),
+			Host:   strings.Repeat("y", n),
+			Path:   strings.Repeat("z", n),
+		}
+		b.Run(fmt.Sprintf("%d", n), func(b *testing.B) {
+			for range b.N {
+				_ = u.String()
+			}
+		})
 	}
 }
