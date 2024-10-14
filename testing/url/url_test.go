@@ -123,3 +123,14 @@ func TestParseError(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkURLString(b *testing.B) {
+	u := &URL{
+		Scheme: "https",
+		Host:   "go.dev",
+		Path:   "play",
+	}
+	for range b.N {
+		_ = u.String()
+	}
+}
