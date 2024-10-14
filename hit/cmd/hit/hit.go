@@ -12,24 +12,12 @@ const logo = `
  \ \_\ \_\  \ \_\    \ \_\
   \/_/\/_/   \/_/     \/_/`
 
-const usage = `
-Usage:
-  -url
-       HTTP server URL (required)
-  -n
-       Number of requests
-  -c
-       Concurrency level
-  -rps
-       Requests per second`
-
 func main() {
 	c := config{
 		n: 100, // default request count
 		c: 1,   // default concurrency level
 	}
 	if err := parseArgs(&c, os.Args[1:]); err != nil {
-		fmt.Printf("%s\n%s", err, usage)
 		os.Exit(1)
 	}
 	fmt.Printf(
