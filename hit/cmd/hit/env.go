@@ -4,9 +4,17 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"net/url"
 	"strconv"
 )
+
+type env struct {
+	stdout io.Writer // stdout abstracts standard output
+	stderr io.Writer // stderr abstracts standard error
+	args   []string  // args are command-line arguments
+	dryRun bool      // dryRun enables dry mode
+}
 
 type config struct {
 	url string // url to send requests
