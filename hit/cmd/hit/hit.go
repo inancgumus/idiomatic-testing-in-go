@@ -24,7 +24,10 @@ Usage:
        Requests per second`
 
 func main() {
-	var c config
+	c := config{
+		n: 100, // default request count
+		c: 1,   // default concurrency level
+	}
 	if err := parseArgs(&c, os.Args[1:]); err != nil {
 		fmt.Printf("%s\n%s", err, usage)
 		os.Exit(1)
