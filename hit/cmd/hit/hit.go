@@ -13,16 +13,30 @@ const logo = `
   \/_/\/_/   \/_/     \/_/`
 
 func main() {
+	e := &env{
+		stdout: os.Stdout,
+		stderr: os.Stderr,
+		args:   os.Args,
+	}
+	if err := run(e); err != nil {
+		os.Exit(1)
+	}
+}
+
+func run(e *env) error {
 	c := config{
 		n: 100, // default request count
 		c: 1,   // default concurrency level
 	}
-	if err := parseArgs(&c, os.Args[1:]); err != nil {
-		os.Exit(1)
+	if err := parseArgs(&c, e.args[1:], e.stderr); err != nil {
+		return err
 	}
-	fmt.Printf(
+
+	fmt.Fprintf(
+		e.stdout,
 		"%s\n\nSending %d requests to %q (concurrency: %d)\n",
 		logo, c.n, c.url, c.c,
 	)
-	/* package hit integration here */
+
+	return nil
 }
