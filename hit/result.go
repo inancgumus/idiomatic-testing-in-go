@@ -1,6 +1,10 @@
 package hit
 
-import "time"
+import (
+	"iter"
+	"net/http"
+	"time"
+)
 
 // Result is performance metrics of a single [http.Request].
 //
@@ -24,4 +28,45 @@ type Summary struct {
 	Duration time.Duration // Duration is the total time since the requests started
 	Fastest  time.Duration // Fastest is the fastest request duration
 	Slowest  time.Duration // Slowest is the slowest request duration
+}
+
+// Results is an iterator for [Result] values.
+type Results iter.Seq[Result]
+
+// Summarize returns a [Summary] of [Results].
+func (r Results) Summarize() Summary {
+	return Summarize(r)
+}
+
+// Summarize returns a [Summary] of [Results].
+func Summarize(results Results) Summary {
+	var s Summary
+	if results == nil {
+		return s
+	}
+
+	s.Started = time.Now()
+
+	for r := range results {
+		s.Requests++
+		s.Bytes += r.Bytes
+
+		if r.Error != nil || r.Status != http.StatusOK {
+			s.Errors++
+		}
+		if s.Fastest == 0 {
+			s.Fastest = r.Duration
+		}
+		if r.Duration < s.Fastest {
+			s.Fastest = r.Duration
+		}
+		if r.Duration > s.Slowest {
+			s.Slowest = r.Duration
+		}
+	}
+
+	s.Duration = time.Since(s.Started)
+	s.RPS = float64(s.Requests) / s.Duration.Seconds()
+
+	return s
 }
