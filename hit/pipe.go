@@ -2,6 +2,7 @@ package hit
 
 import (
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -52,4 +53,45 @@ func throttle(
 		}
 	}()
 	return out
+}
+
+// dispatch sends requests from in using send and sends
+// the results it receives to the returned channel.
+// The concurrency parameter specifies the number of
+// concurrent dispatcher workers to use.
+func dispatch(
+	in <-chan *http.Request,
+	concurrency int,
+	send SendFunc,
+) <-chan Result {
+	out := make(chan Result)
+
+	var wg sync.WaitGroup
+	wg.Add(concurrency)
+
+	for range concurrency {
+		go func() {
+			defer wg.Done()
+			dispatchRequest(in, out, send)
+		}()
+	}
+
+	go func() {
+		wg.Wait()
+		close(out)
+	}()
+
+	return out
+}
+
+// dispatchRequest receives requests from in and sends
+// results to out.
+func dispatchRequest(
+	in <-chan *http.Request,
+	out chan<- Result,
+	send SendFunc,
+) {
+	for req := range in {
+		out <- send(req)
+	}
 }
