@@ -11,8 +11,7 @@ func runPipeline(n int, req *http.Request, opts *Options) <-chan Result {
 	if opts.RPS > 0 {
 		requests = throttle(requests, time.Second/time.Duration(opts.RPS))
 	}
-
-	return nil
+	return dispatch(requests, opts.Concurrency, opts.Send)
 }
 
 func generateRequest(req *http.Request) requestFunc {
