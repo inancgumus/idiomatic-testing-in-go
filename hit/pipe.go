@@ -1,6 +1,9 @@
 package hit
 
-import "net/http"
+import (
+	"net/http"
+	"time"
+)
 
 func runPipeline(n int, req *http.Request, opts *Options) <-chan Result {
 	requests := produce(n, generateRequest(req))
@@ -27,6 +30,23 @@ func produce(n int, genReq requestFunc) <-chan *http.Request {
 		defer close(out)
 		for range n {
 			out <- genReq()
+		}
+	}()
+	return out
+}
+
+// throttle throttles the incoming requests with the given delay.
+func throttle(
+	in <-chan *http.Request, delay time.Duration,
+) <-chan *http.Request {
+	out := make(chan *http.Request)
+	go func() {
+		defer close(out)
+
+		t := time.NewTicker(delay)
+		for r := range in {
+			<-t.C
+			out <- r
 		}
 	}()
 	return out
