@@ -7,7 +7,9 @@ import (
 
 func runPipeline(n int, req *http.Request, opts *Options) <-chan Result {
 	requests := produce(n, generateRequest(req))
-	_ = requests
+	if opts.RPS > 0 {
+		requests = throttle(requests, time.Second/time.Duration(opts.RPS))
+	}
 
 	return nil
 }
