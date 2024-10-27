@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"net/http"
 	"os"
 	"time"
 
@@ -54,7 +55,19 @@ func run(e *env) error {
 }
 
 func runHit(stdout io.Writer, c *config) error {
-	/* TODO: integrate the hit package */
+	req, err := http.NewRequest(http.MethodGet, c.url, http.NoBody)
+	if err != nil {
+		return fmt.Errorf("new request: %w", err)
+	}
+	results, err := hit.SendN(c.n, req, &hit.Options{
+		Concurrency: c.c,
+		RPS:         c.rps,
+	})
+	if err != nil {
+		return fmt.Errorf("send n requests: %w", err)
+	}
+	printSummary(stdout, results.Summarize())
+
 	return nil
 }
 
