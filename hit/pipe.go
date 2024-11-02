@@ -12,9 +12,9 @@ func runPipeline(
 ) <-chan Result {
 	requests := produce(ctx, n, generateRequest(req))
 	if opts.RPS > 0 {
-		requests = throttle(requests, time.Second/time.Duration(opts.RPS))
+		requests = throttle(ctx, requests, time.Second/time.Duration(opts.RPS))
 	}
-	return dispatch(requests, opts.Concurrency, opts.Send)
+	return dispatch(ctx, requests, opts.Concurrency, opts.Send)
 }
 
 func generateRequest(req *http.Request) requestFunc {
@@ -50,7 +50,7 @@ func produce(
 
 // throttle throttles the incoming requests with the given delay.
 func throttle(
-	in <-chan *http.Request, delay time.Duration,
+	ctx context.Context, in <-chan *http.Request, delay time.Duration,
 ) <-chan *http.Request {
 	out := make(chan *http.Request)
 	go func() {
@@ -58,8 +58,16 @@ func throttle(
 
 		t := time.NewTicker(delay)
 		for r := range in {
-			<-t.C
-			out <- r
+			select {
+			case <-ctx.Done():
+				return
+			case <-t.C:
+			}
+			select {
+			case <-ctx.Done():
+				return
+			case out <- r:
+			}
 		}
 	}()
 	return out
@@ -70,6 +78,7 @@ func throttle(
 // The concurrency parameter specifies the number of
 // concurrent dispatcher workers to use.
 func dispatch(
+	ctx context.Context,
 	in <-chan *http.Request,
 	concurrency int,
 	send SendFunc,
@@ -82,7 +91,7 @@ func dispatch(
 	for range concurrency {
 		go func() {
 			defer wg.Done()
-			dispatchRequest(in, out, send)
+			dispatchRequest(ctx, in, out, send)
 		}()
 	}
 
@@ -97,11 +106,16 @@ func dispatch(
 // dispatchRequest receives requests from in and sends
 // results to out.
 func dispatchRequest(
+	ctx context.Context,
 	in <-chan *http.Request,
 	out chan<- Result,
 	send SendFunc,
 ) {
 	for req := range in {
-		out <- send(req)
+		select {
+		case out <- send(req):
+		case <-ctx.Done():
+			return
+		}
 	}
 }
