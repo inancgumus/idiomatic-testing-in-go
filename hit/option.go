@@ -1,6 +1,9 @@
 package hit
 
-import "net/http"
+import (
+	"net/http"
+	"time"
+)
 
 // SendFunc is a type of function that sends a request
 // and returns a result.
@@ -21,7 +24,10 @@ type Options struct {
 	Send SendFunc
 
 	// Client is the HTTP client to use for sending requests.
-	// Default: http.DefaultClient
+	// Default: A new [http.Client] with a custom transport
+	// that limits the number of idle connections per host
+	// to [Options.Concurrency]. It also disables following
+	// redirects and sets a timeout of 30 seconds.
 	Client *http.Client
 }
 
@@ -40,7 +46,15 @@ func (o *Options) setDefaults() *Options {
 		o.Concurrency = 1
 	}
 	if o.Client == nil {
-		o.Client = http.DefaultClient
+		o.Client = &http.Client{
+			Transport: &http.Transport{
+				MaxIdleConnsPerHost: o.Concurrency,
+			},
+			CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
+				return http.ErrUseLastResponse // Don't follow redirects.
+			},
+			Timeout: 30 * time.Second,
+		}
 	}
 	if o.Send == nil {
 		o.Send = func(r *http.Request) Result {
