@@ -27,14 +27,11 @@ func SendN(n int, req *http.Request, opts *Options) (Results, error) {
 }
 
 // Send sends an HTTP request and returns a performance [Result].
-func Send(_ *http.Request) Result {
-	const roundTripTime = 100 * time.Millisecond
+func Send(client *http.Client, req *http.Request) Result {
+	t := time.Now()
 
-	time.Sleep(roundTripTime)
+	response, err := client.Do(req)
+	_, _ = response, err
 
-	return Result{
-		Status:   http.StatusOK,
-		Bytes:    10,
-		Duration: roundTripTime,
-	}
+	return Result{Duration: time.Since(t)}
 }
