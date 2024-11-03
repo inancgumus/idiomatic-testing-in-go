@@ -1,13 +1,16 @@
 package hit
 
 import (
+	"context"
 	"net/http"
 	"sync"
 	"time"
 )
 
-func runPipeline(n int, req *http.Request, opts *Options) <-chan Result {
-	requests := produce(n, generateRequest(req))
+func runPipeline(
+	ctx context.Context, n int, req *http.Request, opts *Options,
+) <-chan Result {
+	requests := produce(ctx, n, generateRequest(req))
 	if opts.RPS > 0 {
 		requests = throttle(requests, time.Second/time.Duration(opts.RPS))
 	}
@@ -26,14 +29,22 @@ func generateRequest(req *http.Request) requestFunc {
 type requestFunc func() *http.Request
 
 // produce produces n requests and sends them to out.
-func produce(n int, genReq requestFunc) <-chan *http.Request {
+func produce(
+	ctx context.Context, n int, genReq requestFunc,
+) <-chan *http.Request {
 	out := make(chan *http.Request)
+
 	go func() {
 		defer close(out)
 		for range n {
-			out <- genReq()
+			select {
+			case <-ctx.Done():
+				return
+			case out <- genReq():
+			}
 		}
 	}()
+
 	return out
 }
 
