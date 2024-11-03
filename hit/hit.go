@@ -35,6 +35,8 @@ func Send(client *http.Client, req *http.Request) Result {
 	response, err := client.Do(req)
 	if err == nil { // no error
 		code = response.StatusCode
+		// TODO: read the body
+		_ = response.Body.Close()
 	}
 
 	return Result{
