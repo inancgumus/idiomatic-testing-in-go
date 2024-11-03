@@ -28,10 +28,18 @@ func SendN(n int, req *http.Request, opts *Options) (Results, error) {
 
 // Send sends an HTTP request and returns a performance [Result].
 func Send(client *http.Client, req *http.Request) Result {
-	t := time.Now()
-
+	var (
+		t    = time.Now()
+		code int
+	)
 	response, err := client.Do(req)
-	_, _ = response, err
+	if err == nil { // no error
+		code = response.StatusCode
+	}
 
-	return Result{Duration: time.Since(t)}
+	return Result{
+		Duration: time.Since(t),
+		Status:   code,
+		Error:    err,
+	}
 }
