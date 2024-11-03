@@ -7,6 +7,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"os/signal"
 	"time"
 
 	"github.com/inancgumus/gobyexample/hit"
@@ -56,10 +57,10 @@ func run(e *env) error {
 }
 
 func runHit(stdout io.Writer, c *config) error {
-	ctx, cancel := context.WithTimeout(
-		context.Background(), 5*time.Second,
-	)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
 	defer cancel()
+	ctx, stop := signal.NotifyContext(ctx, os.Interrupt)
+	defer stop()
 
 	req, err := http.NewRequestWithContext(
 		ctx, http.MethodGet, c.url, http.NoBody,
