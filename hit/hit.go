@@ -2,6 +2,7 @@ package hit
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 )
@@ -29,18 +30,20 @@ func SendN(n int, req *http.Request, opts *Options) (Results, error) {
 // Send sends an HTTP request and returns a performance [Result].
 func Send(client *http.Client, req *http.Request) Result {
 	var (
-		t    = time.Now()
-		code int
+		t     = time.Now()
+		code  int
+		bytes int64
 	)
 	response, err := client.Do(req)
 	if err == nil { // no error
 		code = response.StatusCode
-		// TODO: read the body
+		bytes, err = io.Copy(io.Discard, response.Body)
 		_ = response.Body.Close()
 	}
 
 	return Result{
 		Duration: time.Since(t),
+		Bytes:    bytes,
 		Status:   code,
 		Error:    err,
 	}
