@@ -19,6 +19,10 @@ type Options struct {
 	// Send allows customizing the request processing.
 	// Default: Uses [Send].
 	Send SendFunc
+
+	// Client is the HTTP client to use for sending requests.
+	// Default: http.DefaultClient
+	Client *http.Client
 }
 
 // DefaultOptions returns a new [Options] with the defaults.
@@ -35,8 +39,13 @@ func (o *Options) setDefaults() *Options {
 	if o.Concurrency <= 0 {
 		o.Concurrency = 1
 	}
+	if o.Client == nil {
+		o.Client = http.DefaultClient
+	}
 	if o.Send == nil {
-		o.Send = Send
+		o.Send = func(r *http.Request) Result {
+			return Send(o.Client, r)
+		}
 	}
 	return o
 }
