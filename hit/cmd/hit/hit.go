@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"math"
@@ -55,11 +56,18 @@ func run(e *env) error {
 }
 
 func runHit(stdout io.Writer, c *config) error {
-	req, err := http.NewRequest(http.MethodGet, c.url, http.NoBody)
+	ctx, cancel := context.WithTimeout(
+		context.Background(), 5*time.Second,
+	)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(
+		ctx, http.MethodGet, c.url, http.NoBody,
+	)
 	if err != nil {
 		return fmt.Errorf("new request: %w", err)
 	}
-	results, err := hit.SendN(c.n, req, &hit.Options{
+	results, err := hit.SendN(ctx, c.n, req, &hit.Options{
 		Concurrency: c.c,
 		RPS:         c.rps,
 	})
@@ -68,7 +76,7 @@ func runHit(stdout io.Writer, c *config) error {
 	}
 	printSummary(stdout, results.Summarize())
 
-	return nil
+	return ctx.Err()
 }
 
 func printSummary(stdout io.Writer, s hit.Summary) {
