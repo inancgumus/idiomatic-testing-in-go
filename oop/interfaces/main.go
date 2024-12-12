@@ -11,7 +11,8 @@ func main() {
 	if !srv.slow() {
 		return
 	}
-	msg := fmt.Sprintf("%s server is slow: %s", srv.url, srv.responseTime)
-	notify(new(slackNotifier), msg)
-	notify(new(smsNotifier), msg)
+	notify(
+		multiNotifier{new(slackNotifier), new(smsNotifier)},
+		fmt.Sprintf("%s server is slow: %s", srv.url, srv.responseTime),
+	)
 }
