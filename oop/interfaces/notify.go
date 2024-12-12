@@ -24,3 +24,12 @@ type notifier interface {
 func notify(n notifier, msg string) {
 	n.notify(msg)
 }
+
+// multiNotifier can send notifications using a group of notifiers.
+type multiNotifier []notifier
+
+func (mn multiNotifier) notify(msg string) {
+	for _, n := range mn {
+		n.notify(msg)
+	}
+}
