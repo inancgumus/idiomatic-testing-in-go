@@ -18,3 +18,9 @@ func (s *smsNotifier) notify(msg string) { fmt.Println("sms:", msg) }
 type notifier interface {
 	notify(message string)
 }
+
+// notify sends a message to the given notifier.
+// It doesn't matter what the concrete type is.
+func notify(n notifier, msg string) {
+	n.notify(msg)
+}
