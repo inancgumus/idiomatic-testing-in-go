@@ -10,14 +10,22 @@ func main() {
 	var sg syncx.SafeGroup
 
 	wait := make(chan struct{})
+	stop := make(chan struct{})
 	for range 10 {
 		sg.Go(func() {
-			<-wait
+			select {
+			case <-wait:
+			case <-stop:
+				fmt.Print("stopped.")
+				return
+			}
 			fmt.Print("go!")
 		})
 	}
 	// do other work
-	close(wait)
+	close(stop)
+	// Either close the stop channel or the wait channel
+	// depending on your program's logic.
 	sg.Wait()
 	// do other work
 }
