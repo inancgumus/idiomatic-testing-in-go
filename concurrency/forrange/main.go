@@ -13,11 +13,7 @@ func main() {
 		}
 		close(results)
 	}()
-	for {
-		result, ok := <-results
-		if !ok {
-			break
-		}
+	for result := range results {
 		fmt.Print(result, ".")
 	}
 }
