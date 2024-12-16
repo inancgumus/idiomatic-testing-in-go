@@ -11,12 +11,25 @@ import (
 
 // Server is a URL shortener HTTP server.
 type Server struct {
-	lg *slog.Logger
+	lg  *slog.Logger
+	mux *http.ServeMux
 }
 
 // NewServer returns a new [Server].
-func NewServer(lg *slog.Logger) *Server {
-	return &Server{lg: lg}
+func NewServer(lg *slog.Logger, store *Store) *Server {
+	mux := http.NewServeMux()
+	srv := &Server{
+		lg:  lg,
+		mux: mux,
+	}
+	mux.HandleFunc("POST /shorten", srv.Shorten(store))
+	mux.HandleFunc("GET /r/{key}", srv.Resolve(store))
+	mux.HandleFunc("GET /health", srv.Health)
+	return srv
+}
+
+func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	srv.mux.ServeHTTP(w, r)
 }
 
 // Shorten handles the URL shortening requests.
