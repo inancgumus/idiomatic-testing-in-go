@@ -12,6 +12,19 @@ import (
 // Server is a URL shortener HTTP server.
 type Server struct {
 	lg *slog.Logger
+
+	// Exercise: Since http.Handler is an exported type,
+	// link.Server exposes an unnecessary Handler field
+	// by embedding Handler directly.
+	//
+	// Declare a new unexported interface type in the
+	// link package with a ServeHTTP method, and embed
+	// that interface in Server instead.
+	//
+	// Hint: Go uses structural typing, so it doesn't
+	// matter which interface provides ServeHTTP. Once
+	// Server embeds this unexported interface, you can
+	// still assign a ServeMux to that field.
 	http.Handler
 }
 
@@ -29,6 +42,14 @@ func NewServer(lg *slog.Logger, store *Store) *Server {
 }
 
 // Shorten handles the URL shortening requests.
+//
+//	Status Code       Condition
+//	201               The link is successfully shortened.
+//	400               The request is invalid.
+//	409               The link already exists.
+//	405               The request method is not POST.
+//	413               The request body is too large.
+//	500               There is an internal error.
 func (srv *Server) Shorten(links *Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		link := Link{
@@ -45,6 +66,14 @@ func (srv *Server) Shorten(links *Store) http.HandlerFunc {
 }
 
 // Resolve handles the URL resolving requests for the shortened links.
+//
+// Uses the "key" [http.Request.PathValue] to resolve the link.
+//
+//	Status Code       Condition
+//	302               The link is successfully resolved.
+//	400               The request is invalid.
+//	404               The link does not exist.
+//	500               There is an internal error.
 func (srv *Server) Resolve(links *Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		link, err := links.Retrieve(r.Context(), r.PathValue("key"))
@@ -57,6 +86,9 @@ func (srv *Server) Resolve(links *Store) http.HandlerFunc {
 }
 
 // Health serves the health check requests.
+//
+//	Status Code       Condition
+//	200               The server is healthy.
 func (srv *Server) Health(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "OK")
 }
