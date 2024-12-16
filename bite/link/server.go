@@ -35,6 +35,18 @@ func (srv *Server) Shorten(links *Store) http.HandlerFunc {
 	}
 }
 
+// Resolve handles the URL resolving requests for the shortened links.
+func (srv *Server) Resolve(links *Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		link, err := links.Retrieve(r.Context(), r.PathValue("key"))
+		if err != nil {
+			httpError(w, err)
+			return
+		}
+		http.Redirect(w, r, link.URL, http.StatusFound)
+	}
+}
+
 // Health serves the health check requests.
 func (srv *Server) Health(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "OK")
