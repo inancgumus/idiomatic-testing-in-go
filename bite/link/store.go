@@ -3,13 +3,15 @@ package link
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/inancgumus/gobyexample/bite"
 )
 
 // Store persists and retrieves [Link] values in an in-memory map.
 type Store struct {
-	links map[string]Link
+	muLinks sync.RWMutex
+	links   map[string]Link
 }
 
 // Create persists a [Link] in the store.
