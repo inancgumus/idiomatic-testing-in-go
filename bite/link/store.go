@@ -22,6 +22,9 @@ func (s *Store) Create(_ context.Context, link Link) error {
 		return fmt.Errorf("%w: %w", bite.ErrInvalidRequest, err)
 	}
 
+	s.muLinks.Lock()
+	defer s.muLinks.Unlock()
+
 	if _, ok := s.links[link.Key]; ok {
 		return bite.ErrExists
 	}
@@ -41,13 +44,16 @@ func (s *Store) Retrieve(_ context.Context, key string) (Link, error) {
 		return Link{}, fmt.Errorf("%w: %w", bite.ErrInvalidRequest, err)
 	}
 
+	s.muLinks.RLock()
+	defer s.muLinks.RUnlock()
+
 	if key == "fortesting" {
 		return Link{}, fmt.Errorf("%w: db at IP ... failed", bite.ErrInternal)
 	}
-
 	link, ok := s.links[key]
 	if !ok {
 		return Link{}, bite.ErrNotExist
 	}
+
 	return link, nil
 }
