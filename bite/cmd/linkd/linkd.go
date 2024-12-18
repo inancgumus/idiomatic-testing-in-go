@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/inancgumus/gobyexample/bite/link"
 )
@@ -17,8 +18,13 @@ func main() {
 
 	linkServer := link.NewServer(log)
 
-	err := http.ListenAndServe(addr, http.HandlerFunc(linkServer.Health))
-	if !errors.Is(err, http.ErrServerClosed) {
+	srv := &http.Server{
+		Addr:        addr,
+		Handler:     http.HandlerFunc(linkServer.Health),
+		ReadTimeout: 20 * time.Second,
+		IdleTimeout: 40 * time.Second,
+	}
+	if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 		log.Error("server closed unexpectedly", "message", err)
 	}
 }
