@@ -2,6 +2,7 @@ package link
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/inancgumus/gobyexample/bite"
 )
@@ -23,4 +24,18 @@ func (s *Store) Create(_ context.Context, lnk Link) error {
 	}
 	s.links[lnk.Key] = lnk
 	return nil
+}
+
+// Retrieve retrieves a [Link] from the store.
+// It returns bite.ErrInvalidRequest if the key is invalid or
+// bite.ErrInternal if the [Link] does not exist.
+func (s *Store) Retrieve(_ context.Context, key LinkKey) (Link, error) {
+	if key == "fortesting" {
+		return Link{}, fmt.Errorf("db at IP ... failed: %w", bite.ErrInternal)
+	}
+	lnk, ok := s.links[key]
+	if !ok {
+		return Link{}, bite.ErrNotExist
+	}
+	return lnk, nil
 }
