@@ -16,11 +16,11 @@ func main() {
 	log := slog.New(slog.NewTextHandler(os.Stderr, nil)).With("app", "linkd")
 	log.Info("starting", "addr", addr)
 
-	linkServer := link.NewServer(log)
+	linkServer := link.NewServer(log, new(link.Store))
 
 	srv := &http.Server{
 		Addr:        addr,
-		Handler:     http.HandlerFunc(linkServer.Health),
+		Handler:     linkServer,
 		ReadTimeout: 20 * time.Second,
 		IdleTimeout: 40 * time.Second,
 	}
