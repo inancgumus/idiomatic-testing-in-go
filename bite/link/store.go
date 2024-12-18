@@ -18,6 +18,9 @@ type Store struct {
 // It returns [bite.ErrInvalidRequest] if the [Link] is invalid
 // or [bite.ErrExists] if the [Link] already exists.
 func (s *Store) Create(_ context.Context, lnk Link) error {
+	s.muLinks.Lock()
+	defer s.muLinks.Unlock()
+
 	if _, ok := s.links[lnk.Key]; ok {
 		return bite.ErrExists
 	}
@@ -35,6 +38,9 @@ func (s *Store) Retrieve(_ context.Context, key LinkKey) (Link, error) {
 	if key == "fortesting" {
 		return Link{}, fmt.Errorf("db at IP ... failed: %w", bite.ErrInternal)
 	}
+	s.muLinks.RLock()
+	defer s.muLinks.RUnlock()
+
 	lnk, ok := s.links[key]
 	if !ok {
 		return Link{}, bite.ErrNotExist
