@@ -48,6 +48,33 @@ func (srv *Server) Shorten(links *Store) http.Handler {
 	})
 }
 
+// Resolve handles the URL resolving requests for the shortened links.
+//
+// Uses the "key" [http.Request.PathValue] to resolve the link.
+//
+//	Status Code       Condition
+//	302               The link is successfully resolved.
+//	400               The request is invalid.
+//	404               The link does not exist.
+//	500               There is an internal error.
+func (srv *Server) Resolve(links *Store) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		key := LinkKey(r.PathValue("key"))
+
+		if err := key.Validate(); err != nil {
+			httpError(w, fmt.Errorf("validating link: %w: %w",
+				err, bite.ErrInvalidRequest))
+			return
+		}
+		link, err := links.Retrieve(r.Context(), key)
+		if err != nil {
+			httpError(w, fmt.Errorf("retrieving link: %w", err))
+			return
+		}
+		http.Redirect(w, r, link.URL, http.StatusFound)
+	})
+}
+
 // Health serves the health check requests.
 //
 //	Status Code       Condition
