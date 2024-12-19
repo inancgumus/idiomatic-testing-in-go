@@ -12,6 +12,19 @@ import (
 // Server is a URL shortener HTTP server.
 type Server struct {
 	lg *slog.Logger
+
+	// Exercise: Since http.Handler is an exported type,
+	// link.Server exposes an unnecessary Handler field
+	// by embedding Handler directly.
+	//
+	// Declare a new unexported interface type in the
+	// link package with a ServeHTTP method, and embed
+	// that interface in Server instead.
+	//
+	// Hint: Go uses structural typing, so it doesn't
+	// matter which interface provides ServeHTTP. Once
+	// Server embeds this unexported interface, you can
+	// still assign a ServeMux to that field.
 	http.Handler
 }
 
