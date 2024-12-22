@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/inancgumus/gobyexample/bite/httplog"
 	"github.com/inancgumus/gobyexample/bite/link"
 )
 
@@ -18,9 +19,17 @@ func main() {
 
 	linkServer := link.NewServer(log, new(link.Store))
 
+	response := new(httplog.Response)
+	logger := httplog.New(log).With(
+		httplog.URL,
+		httplog.Method,
+		httplog.RemoteAddr,
+		response.Time,
+	)
+
 	srv := &http.Server{
 		Addr:        addr,
-		Handler:     linkServer,
+		Handler:     logger.Wrap(response.Wrap(linkServer)),
 		ReadTimeout: 20 * time.Second,
 		IdleTimeout: 40 * time.Second,
 	}
