@@ -25,6 +25,7 @@ func main() {
 		httplog.Method,
 		httplog.RemoteAddr,
 		response.Time,
+		response.StatusCode,
 	)
 
 	srv := &http.Server{
