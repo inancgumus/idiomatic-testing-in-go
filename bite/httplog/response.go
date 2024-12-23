@@ -31,3 +31,16 @@ func (res *Response) Time(_ *http.Request) slog.Attr {
 	}
 	return slog.Duration("response_time", time.Since(res.requestStart))
 }
+
+// responseInterceptor intercepts [http.ResponseWriter] calls.
+type responseInterceptor struct {
+	http.ResponseWriter
+	writeHeader func(int)
+}
+
+func (r *responseInterceptor) WriteHeader(code int) {
+	if r.writeHeader != nil {
+		r.writeHeader(code)
+	}
+	r.ResponseWriter.WriteHeader(code)
+}
